@@ -6,6 +6,18 @@ class ContactNotExistError(Exception):
     pass
 
 
+class NameLengthError(Exception):
+    pass
+
+
+class PhoneLengthError(Exception):
+    pass
+
+
+class PhoneDigitError(Exception):
+    pass
+
+
 def input_error(func):
     def inner(*args, **kwargs):
         try:
@@ -14,6 +26,12 @@ def input_error(func):
             return "Contact with this name has already saved."
         except ContactNotExistError:
             return "This contact does not exist, please add it first."
+        except NameLengthError:
+            return "The name must be longer than 1 character."
+        except PhoneLengthError:
+            return "The phone must be longer than 10 character."
+        except PhoneDigitError:
+            return "The phone should contain only numbers."
         except ValueError:
             return "Give me name and phone please."
         except IndexError:
@@ -28,11 +46,25 @@ def parse_input(user_input):
     return cmd, *args
 
 
+def validate_name(name):
+    if len(name) < 2:
+        raise NameLengthError
+
+
+def validate_phone(phone):
+    if len(phone) < 10:
+        raise PhoneLengthError
+    if not phone.isdigit():
+        raise PhoneDigitError
+
+
 @input_error
 def add_contact(args, contacts):
     name, phone = args
     if name in contacts:
         raise ContactAlreadyExistError
+    validate_name(name)
+    validate_phone(phone)
     contacts.update({name: phone})
     return "Contact added."
 
@@ -42,6 +74,7 @@ def change_contact(args, contacts):
     name, phone = args
     if not name in contacts:
         raise ContactNotExistError
+    validate_phone(phone)
     contacts.update({name: phone})
     return "Contact changed."
 

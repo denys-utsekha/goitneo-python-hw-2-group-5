@@ -58,8 +58,8 @@ class Phone(Field):
         super().__init__(self.validate(phone))
 
     def validate(self, phone):
-        if len(phone) < 10:
-            raise ValueError("The phone must be longer than 10 character.")
+        if len(phone) != 10:
+            raise ValueError("The phone must be 10 character.")
         return phone
 
 

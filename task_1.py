@@ -1,23 +1,57 @@
+class ContactAlreadyExistError(Exception):
+    pass
+
+
+class ContactNotExistError(Exception):
+    pass
+
+
+def input_error(func):
+    def inner(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except ContactAlreadyExistError:
+            return "Contact with this name has already saved."
+        except ContactNotExistError:
+            return "This contact does not exist, please add it first."
+        except ValueError:
+            return "Give me name and phone please."
+        except IndexError:
+            return "Enter user name."
+
+    return inner
+
+
 def parse_input(user_input):
     cmd, *args = user_input.split()
     cmd = cmd.strip().lower()
     return cmd, *args
 
 
+@input_error
 def add_contact(args, contacts):
     name, phone = args
-    contacts[name] = phone
+    if name in contacts:
+        raise ContactAlreadyExistError
+    contacts.update({name: phone})
     return "Contact added."
 
 
+@input_error
 def change_contact(args, contacts):
     name, phone = args
-    contacts[name] = phone
+    if not name in contacts:
+        raise ContactNotExistError
+    contacts.update({name: phone})
     return "Contact changed."
 
 
+@input_error
 def get_contact_phone(args, contacts):
-    return contacts[args[0]]
+    name = args[0]
+    if not name in contacts:
+        raise ContactNotExistError
+    return contacts[name]
 
 
 def get_all_contacts(contacts):
